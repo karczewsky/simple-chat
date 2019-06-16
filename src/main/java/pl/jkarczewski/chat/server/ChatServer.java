@@ -65,4 +65,8 @@ public class ChatServer {
             client.sendMessage("MSG " + originThread.getNickname() + " " + message);
         }
     }
+
+    public void removeClient(ChatServerThread clientThread) {
+        clients.remove(clientThread);
+    }
 }
