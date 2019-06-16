@@ -44,13 +44,11 @@ public class ChatServer {
         String[] arr = message.split(" ");
 
         switch (arr[0]) {
-            case "!END":
-                originThread.shut();
-                clients.remove(originThread);
-                break;
-            case "!SETNAME":
+            // format: !JOINED <NICKNAME>
+            case "!JOINED":
                 if (arr.length > 1)
                     originThread.setNickname(arr[1]);
+                    sendSystemNotification(originThread.getNickname() + " joined, give them warm welcome!");
                 break;
             default:
                 sendToOtherClients(originThread, message);
@@ -59,6 +57,11 @@ public class ChatServer {
 
     }
 
+    public void sendSystemNotification(String message) {
+        for (ChatServerThread client: clients) {
+            client.sendMessage("MSG SYSTEM " + message);
+        }
+    }
 
     public void sendToOtherClients(ChatServerThread originThread, String message) {
         for (ChatServerThread client: clients) {
@@ -67,6 +70,8 @@ public class ChatServer {
     }
 
     public void removeClient(ChatServerThread clientThread) {
+        System.out.println("Removing client thread " + clientThread.getIdentifier() + " Nickname: " + clientThread.getNickname());
         clients.remove(clientThread);
+        sendSystemNotification(clientThread.getNickname() + " left server, what a shame.");
     }
 }

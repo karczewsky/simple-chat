@@ -1,52 +1,80 @@
 package pl.jkarczewski.chat.client;
 
-import org.apache.groovy.json.internal.IO;
-
 import java.io.*;
 import java.net.Socket;
-import java.util.concurrent.BlockingQueue;
+import java.util.Arrays;
 
 public class ChatClient {
-    private String username;
+    private Controller controller;
+
     private Socket socket;
-    private BufferedReader in;
-    private PrintWriter out;
-    private volatile boolean working;
+    private DataOutputStream streamOut;
+    private ChatClientThread client;
 
-    private final Runnable hearthbeatTask = () -> {
-        while (working) {
-            if (!socket.isClosed()) {
-                out.println("PING");
-                try {
-                    Thread.sleep(3000);
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-        }
-    };
+    public ChatClient(Controller controller) {
+        this.controller = controller;
+    }
 
-    private BlockingQueue<String> messageQueue;
-
-    ChatClient(String host, int port, String username) throws IOException {
-        this.working = true;
-        this.socket = new Socket(host, port);
-
-        if (username.contains(" "))
-            throw new RuntimeException("Usernames with spaces are invalid");
-
-        this.username = username;
-
+    public void connect(String serverName, int serverPort) {
         try {
-            this.in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            this.out = new PrintWriter(socket.getOutputStream(), true);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+            socket = new Socket(serverName, serverPort);
+            addMessageForUser("Connected to server: " + socket);
+            open();
+
+            controller.setConnected(true);
+        } catch (IOException ex) {
+            addMessageForUser("SYSTEM: Unknown error occurred: " + ex.getMessage());
         }
     }
 
-    public void work() {
-        Thread thread = new Thread(hearthbeatTask);
-        thread.start();
+    public void send(String msg) {
+        try {
+            streamOut.writeUTF(msg.trim());
+            streamOut.flush();
+        } catch (IOException ex) {
+            addMessageForUser("SYSTEM: Error sending message to server.");
+        }
     }
+
+    public void open() {
+        try {
+            streamOut = new DataOutputStream(socket.getOutputStream());
+            client = new ChatClientThread(this, socket);
+            client.start();
+        } catch (IOException ex) {
+            addMessageForUser("SYSTEM: Unknown error occurred: " + ex.getMessage());
+        }
+    }
+
+    public void shut() {
+        client.shut();
+        try {
+            streamOut.close();
+        } catch (IOException ex) {
+            System.err.println("ERROR closing connection");
+        }
+
+        addMessageForUser("SYSTEM: Disconnected from server.");
+        controller.setConnected(false);
+    }
+
+    public void handle(String msg) {
+        String[] arr = msg.split(" ");
+
+        switch (arr[0]) {
+            case "MSG":
+                if (arr.length >= 3) {
+                    String[] cp = Arrays.copyOfRange(arr, 2, arr.length);
+                    addMessageForUser(arr[1] + ": " + String.join(" ", cp));
+                }
+                break;
+        }
+
+    }
+
+    public void addMessageForUser(String msg) {
+        controller.addMessage(msg);
+    }
+
+
 }

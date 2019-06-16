@@ -1,18 +1,31 @@
 package pl.jkarczewski.chat.client;
 
-import java.io.IOException;
+import javafx.application.Application;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.stage.Stage;
 
-public class Main {
+
+public class Main extends Application {
+
     public static void main(String[] args) {
-        ChatClient chatClient;
+        launch(args);
+    }
 
-        try {
-            chatClient = new ChatClient("localhost", 6969, "jakub");
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+    @Override
+    public void start(Stage primaryStage) throws Exception {
+        Parent root = FXMLLoader.load(getClass().getResource("/app.fxml"));
+        primaryStage.setTitle("Chatter");
+        primaryStage.setScene(new Scene(root));
+        primaryStage.setResizable(false);
+        primaryStage.show();
+    }
+
+    @Override
+    public void stop() throws Exception {
 
 
-        chatClient.work();
+        super.stop();
     }
 }

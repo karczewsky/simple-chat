@@ -35,5 +35,5 @@ jar {
     }
 }
 
-mainClassName = 'pl.jkarczewski.Main'
+mainClassName = 'pl.jkarczewski.chat.client.Main'
 

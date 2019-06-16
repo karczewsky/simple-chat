@@ -24,6 +24,10 @@ public class ChatServerThread extends Thread {
         this.working = true;
     }
 
+    public int getIdentifier() {
+        return Id;
+    }
+
     public void sendMessage(String msg) {
         try {
             streamOut.writeUTF(msg);
