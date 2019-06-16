@@ -4,6 +4,9 @@ import java.io.*;
 import java.net.Socket;
 import java.util.Arrays;
 
+/**
+ * Class which holds all business logic of chat app.
+ */
 public class ChatClient {
     private Controller controller;
 
@@ -15,6 +18,12 @@ public class ChatClient {
         this.controller = controller;
     }
 
+    /**
+     * Method preparing new connection to remote server.
+     *
+     * @param serverName hostname of remote server
+     * @param serverPort port on which remote server is running
+     */
     public void connect(String serverName, int serverPort) {
         try {
             socket = new Socket(serverName, serverPort);
@@ -27,6 +36,11 @@ public class ChatClient {
         }
     }
 
+    /**
+     * Method used to send bare UTF message to remote server.
+     *
+     * @param msg String message sent to server
+     */
     public void send(String msg) {
         try {
             streamOut.writeUTF(msg.trim());
@@ -36,6 +50,9 @@ public class ChatClient {
         }
     }
 
+    /**
+     * Method used to open required streams and set up {@link ChatClientThread}.
+     */
     public void open() {
         try {
             streamOut = new DataOutputStream(socket.getOutputStream());
@@ -46,6 +63,10 @@ public class ChatClient {
         }
     }
 
+
+    /**
+     * Method responsible for streams shutdown and safe exit of {@link ChatClientThread}.
+     */
     public void shut() {
         client.shut();
         try {
@@ -58,6 +79,12 @@ public class ChatClient {
         controller.setConnected(false);
     }
 
+
+    /**
+     * Method performing necessary data parse of data, retrieved from server.
+     *
+     * @param msg Message received from remote server
+     */
     public void handle(String msg) {
         String[] arr = msg.split(" ");
 
@@ -72,6 +99,11 @@ public class ChatClient {
 
     }
 
+    /**
+     * Method used to to add new message/notification to chat log.
+     *
+     * @param msg
+     */
     public void addMessageForUser(String msg) {
         controller.addMessage(msg);
     }

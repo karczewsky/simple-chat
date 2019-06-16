@@ -13,6 +13,9 @@ import javafx.scene.control.TextField;
 import java.net.URL;
 import java.util.ResourceBundle;
 
+/**
+ * Class responsible for UI functionality.
+ */
 public class Controller implements Initializable {
 
     @FXML private TextField serverAddressField;
@@ -34,7 +37,7 @@ public class Controller implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
 
-        chatMessages = FXCollections.observableArrayList("SYSTEM: Welcome in Chatter :)");
+        chatMessages = FXCollections.observableArrayList("SYSTEM: Welcome to Chatter :)");
         chatLog.setItems(chatMessages);
 
         setConnected(false);
@@ -85,10 +88,20 @@ public class Controller implements Initializable {
 
     }
 
+    /**
+     * Method used to add entry to chat log.
+     *
+     * @param msg String message, which should be added to chat log.
+     */
     public void addMessage(String msg) {
         Platform.runLater(() -> chatMessages.add(msg));
     }
 
+    /**
+     * Method responsible for controlling Disabled/Enabled state of UI components.
+     *
+     * @param connected boolean: true -> client connected to server; false  -> client disconnected
+     */
     public void setConnected(boolean connected) {
 
         serverAddressField.setDisable(connected);
